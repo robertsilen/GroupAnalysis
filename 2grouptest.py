@@ -56,7 +56,7 @@ if test=='mw':
 		results_levene.loc[column] = levene(groupa, groupb)[1]
 		results_var.loc[column,'VAR-0'] = groupa.var()
 		results_var.loc[column,'VAR-1'] = groupb.var()
-		results_mw.loc[column] =  mannwhitneyu(groupa, groupb,'two-sided')[1]
+		results_mw.loc[column] =  mannwhitneyu(groupa, groupb,alternative='two-sided')[1]
 	df = pd.concat([results_zeroes, results_kurt, results_skew, results_var, results_shapiro, results_levene, results_mw, df.T], axis=1)
 	success = True
 
