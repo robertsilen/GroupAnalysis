@@ -26,7 +26,7 @@ df = pd.read_csv(input)
 df.set_index('Person',inplace=True)
 df = df.T
 print('Dataframe size: '+str(df.shape)) 
-	
+
 grouped = df[['Group']].groupby('Group')
 a = grouped.size().tolist()
 len_first = a[0] if a else None
@@ -59,9 +59,7 @@ for column in df.ix[:,1:]:
 		results_skew.loc[column,'SKEW-'+str(i)] = element.skew()
 		results_var.loc[column,'VAR-'+str(i)] = element.var()
 		results_shapiro.loc[column,'Shapiro Norm-'+str(i)] = shapiro(element)[1]
-	if df[column].isnull().values.any():
-		print('NaN values found: '+str(column))
-	else:
+	if not df[column].isnull().values.any():
 		results_kruskal.loc[column] = (kruskal(args[0],*args[1:]))
 		results_levene.loc[column] = (levene(args[0],*args[1:]))
 	if equalsize:
@@ -69,6 +67,7 @@ for column in df.ix[:,1:]:
 
 df = pd.concat([results_nans, results_zeroes, results_kurt, results_skew, results_var, results_shapiro, results_levene, results_kruskal, results_friedman, df.T], axis=1)
 
+df = pd.concat([df.loc[['Group'],:], df.drop('Group', axis=0)], axis=0)
 
 # Write file
 if input.endswith('.csv'):
