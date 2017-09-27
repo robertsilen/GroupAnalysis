@@ -1,1 +1,1 @@
-Script for running statistical tests on groups of values.
+Scripts for running statistical tests on groups of values.
