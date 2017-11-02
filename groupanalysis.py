@@ -14,7 +14,6 @@ import time
 import os.path
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.stats import shapiro
 from scipy.stats import levene
 from scipy.stats import f_oneway
