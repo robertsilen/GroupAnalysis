@@ -108,7 +108,7 @@ for j, element in enumerate(sys.argv[1:]):
 		results.loc[column,'ANOVA One-Way P-value'] = (f_oneway(args[0],*args[1:])[1]) if groupamount>1 else 'NaN'
 		if firstrun==True: explanations.loc['Group','ANOVA One-Way P-value'] = '3 groups independent. Asumes normal dist. Criteria <0.05'
 		results.loc[column,'Kruskal P-value'] = (kruskal(args[0],*args[1:])[0]) if groupamount>1 else 'NaN'
-		if firstrun==True: explanations.loc['Group','Kruskal P-value'] = '2+ groups indendent non-parametric. Criteria <0.05'
+		if firstrun==True: explanations.loc['Group','Kruskal P-value'] = '2+ groups independent non-parametric. Criteria <0.05'
 		results.loc[column,'Friedman P-value'] = (friedmanchisquare(args[0],*args[1:])[1]) if groupamount>2 and equalsize else 'NaN'
 		if firstrun==True: explanations.loc['Group','Friedman P-value'] = '3 groups dependent non-parametric. Asumes equal size. Criteria <0.05'
 		firstrun = False
@@ -122,14 +122,14 @@ for j, element in enumerate(sys.argv[1:]):
 	summary_nans.loc['Total Count'] = len(results_nans)
 
 	summary_kurt = results_kurt.copy()
-	summary_kurt.loc['Criteria Count'] =  results_kurt[(results_kurt > -3) & (results_kurt < 3)].count().apply('{:d}'.format)
+	summary_kurt.loc['Criteria Count'] =  results_kurt[(results_kurt < -3) | (results_kurt > 3)].count().apply('{:d}'.format)
 	summary_kurt.loc['Total Count'] = len(results_kurt)
-	summary_kurt.loc['Percentage'] = (results_kurt[(results_kurt > -3) & (results_kurt < 3)].count() / len(results_kurt)).apply('{:.0%}'.format)
+	summary_kurt.loc['Percentage'] = (results_kurt[(results_kurt < -3) | (results_kurt > 3)].count() / len(results_kurt)).apply('{:.0%}'.format)
 	
 	summary_skew = results_skew.copy()
-	summary_skew.loc['Criteria Count'] = results_skew[(results_skew > -0.8) & (results_skew < 0.8)].count().apply('{:d}'.format)
+	summary_skew.loc['Criteria Count'] = results_skew[(results_skew < -0.8) | (results_skew > 0.8)].count().apply('{:d}'.format)
 	summary_skew.loc['Total Count'] =  len(results_skew)
-	summary_skew.loc['Percentage'] =  (results_skew[(results_skew > -0.8) & (results_skew < 0.8)].count() / len(results_skew)).apply('{:.0%}'.format)
+	summary_skew.loc['Percentage'] =  (results_skew[(results_skew < -0.8) | (results_skew > 0.8)].count() / len(results_skew)).apply('{:.0%}'.format)
 	
 	summary_shapiro = results_shapiro.copy()
 	summary_shapiro.loc['Criteria Count'] = results_shapiro[(results_shapiro < 0.05)].count().apply('{:d}'.format)
