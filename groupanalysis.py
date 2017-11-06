@@ -75,7 +75,7 @@ for j, element in enumerate(sys.argv[1:]):
 
 	for column in df.ix[:,1:]:
 		firstrun = True
-		results_zeroes.loc[column,'Zeroes'] = pd.to_numeric(sum(df[column] == 0), downcast='integer')
+		results_zeroes.loc[column,'Zeroes'] = sum(df[column] == 0)
 		explanations.loc['Group','Zeroes'] = 'Possible errors'
 		results_nans.loc[column,'NaNs'] = sum(df[column].isnull())
 		explanations.loc['Group','NaNs'] = 'Not A Number, possible errors'
@@ -88,43 +88,73 @@ for j, element in enumerate(sys.argv[1:]):
 			results_medians.loc[column,'Median - '+names[i]] = element.median()
 			timeseries_medians.loc[column,'Median - '+input+'-'+names[i]] = element.median()
 			results_kurt.loc[column,'Kurtosis - '+names[i]] = element.kurt()
-			if firstrun==True: explanations.loc['Group','Kurtosis - '+names[i]] = '-3 to 3 is normal'
+			if firstrun==True: explanations.loc['Group','Kurtosis - '+names[i]] = 'Not normal when <-3 or >3'
 			results_skew.loc[column,'Skewness - '+names[i]] = element.skew()
-			if firstrun==True: explanations.loc['Group','Skewness - '+names[i]] = '-0.8 to 0.8 is normal'
+			if firstrun==True: explanations.loc['Group','Skewness - '+names[i]] = 'Not normal when <-0.8 or >0.8'
 			results_shapiro.loc[column,'Shapiro Norm - '+names[i]] = shapiro(element)[1]
-			if firstrun==True: explanations.loc['Group','Shapiro Norm - '+names[i]] = 'When < 0.05, the sample deviates from normality'
+			if firstrun==True: explanations.loc['Group','Shapiro Norm - '+names[i]] = 'Not normal when <0.05'
 			results_var.loc[column,'Variance - '+names[i]] = element.var()
-			if firstrun==True: explanations.loc['Group','Variance - '+names[i]] = 'How far values are spread out from the average'
-		results_levene.loc[column,'Levene P-Value'] = (levene(args[0],*args[1:])[0])
-		if firstrun==True: explanations.loc['Group','Levene P-Value'] = 'When <.05 the variability is equal.' 
-		results.loc[column,'ANOVA One-Way P-value'] = (f_oneway(args[0],*args[1:])[1]) if groupamount>1 else 'NaN'
-		if firstrun==True: explanations.loc['Group','ANOVA One-Way P-value'] = 'When <.05 there is a statistical significant difference'
+			if firstrun==True: explanations.loc['Group','Variance - '+names[i]] = 'The spread from the average'
+		results.loc[column,'Levene P-Value'] = (levene(args[0],*args[1:])[0])
+		if firstrun==True: explanations.loc['Group','Levene P-Value'] = 'Variance is different when <0.05' 
 		results.loc[column,'T-Test Ind. P-value'] = (ttest_ind(args[0],*args[1:])[1]) if groupamount==2 else 'NaN'
-		if firstrun==True: explanations.loc['Group','T-Test Ind. P-value'] = 'When <.05 there is a statistical significant difference'
+		if firstrun==True: explanations.loc['Group','T-Test Ind. P-value'] = '2 groups independent. Asumes normal dist. Criteria <0.05'
 		results.loc[column,'Mann-Whitney P-value'] = (mannwhitneyu(args[0],*args[1:])[1]) if groupamount==2 else 'NaN'
-		if firstrun==True: explanations.loc['Group','Mann-Whitney P-value'] = 'When <.05 there is a statistical significant differencs'
+		if firstrun==True: explanations.loc['Group','Mann-Whitney P-value'] = '2 groups independent non-parametric. Criteria <0.05'
 		results.loc[column,'T-Test Rel. P-value'] = (ttest_rel(args[0],*args[1:])[1]) if groupamount==2 and equalsize else 'NaN'
-		if firstrun==True: explanations.loc['Group','T-Test Rel. P-value'] = 'When <.05 there is a statistical significant differences'
+		if firstrun==True: explanations.loc['Group','T-Test Rel. P-value'] = '2 groups dependent. Asumes normal dist. and equal size. Criteria <.05'
 		results.loc[column,'Wilcoxon P-value'] = (wilcoxon(args[0],*args[1:])[1]) if groupamount==2 and equalsize else 'NaN'
-		if firstrun==True: explanations.loc['Group','Wilcoxon P-value'] = 'When <.05 there is a statistical significant difference'
+		if firstrun==True: explanations.loc['Group','Wilcoxon P-value'] = '2 groups dependent non-parametric. Asumes equal size. Criteria <0.05'
+		results.loc[column,'ANOVA One-Way P-value'] = (f_oneway(args[0],*args[1:])[1]) if groupamount>1 else 'NaN'
+		if firstrun==True: explanations.loc['Group','ANOVA One-Way P-value'] = '3 groups independent. Asumes normal dist. Criteria <0.05'
 		results.loc[column,'Kruskal P-value'] = (kruskal(args[0],*args[1:])[0]) if groupamount>1 else 'NaN'
-		if firstrun==True: explanations.loc['Group','Kruskal P-value'] = 'When <.05 there is a statistical significant differences'
+		if firstrun==True: explanations.loc['Group','Kruskal P-value'] = '2+ groups indendent non-parametric. Criteria <0.05'
 		results.loc[column,'Friedman P-value'] = (friedmanchisquare(args[0],*args[1:])[1]) if groupamount>2 and equalsize else 'NaN'
-		if firstrun==True: explanations.loc['Group','Friedman P-value'] = 'When <.05 there is a statistical significant difference'
+		if firstrun==True: explanations.loc['Group','Friedman P-value'] = '3 groups dependent non-parametric. Asumes equal size. Criteria <0.05'
 		firstrun = False
 
+	summary_zeroes = results_zeroes.copy()
+	summary_zeroes.loc['Criteria Count'] = results_zeroes[results_zeroes != 0].count().apply('{:d}'.format)
+	summary_zeroes.loc['Total Count'] = len(results_zeroes)
+	
+	summary_nans = results_nans.copy()
+	summary_nans.loc['Criteria Count'] = results_nans[results_nans != 0].count().apply('{:d}'.format)
+	summary_nans.loc['Total Count'] = len(results_nans)
+
+	summary_kurt = results_kurt.copy()
+	summary_kurt.loc['Criteria Count'] =  results_kurt[(results_kurt > -3) & (results_kurt < 3)].count().apply('{:d}'.format)
+	summary_kurt.loc['Total Count'] = len(results_kurt)
+	summary_kurt.loc['Percentage'] = (results_kurt[(results_kurt > -3) & (results_kurt < 3)].count() / len(results_kurt)).apply('{:.0%}'.format)
+	
+	summary_skew = results_skew.copy()
+	summary_skew.loc['Criteria Count'] = results_skew[(results_skew > -0.8) & (results_skew < 0.8)].count().apply('{:d}'.format)
+	summary_skew.loc['Total Count'] =  len(results_skew)
+	summary_skew.loc['Percentage'] =  (results_skew[(results_skew > -0.8) & (results_skew < 0.8)].count() / len(results_skew)).apply('{:.0%}'.format)
+	
+	summary_shapiro = results_shapiro.copy()
+	summary_shapiro.loc['Criteria Count'] = results_shapiro[(results_shapiro < 0.05)].count().apply('{:d}'.format)
+	summary_shapiro.loc['Total Count'] =  len(results_shapiro)
+	summary_shapiro.loc['Percentage'] = (results_shapiro[(results_shapiro < 0.05)].count() / len(results_shapiro)).apply('{:.0%}'.format)
+
+	summary = results.copy()
+	summary.loc['Criteria Count'] = results[(results < 0.05)].count().apply('{:d}'.format)
+	summary.loc['Total Count'] =  len(results)
+	summary.loc['Percentage'] = (results[(results < 0.05)].count() / len(results)).apply('{:.0%}'.format)
+
 	df = pd.concat([
-			results_zeroes, 
-			results_nans, 
+			summary_zeroes, 
+			summary_nans, 
 			results_medians, 
-			results_kurt, 
-			results_skew, 
-			results_shapiro,
+			summary_kurt,
+			summary_skew, 
+			summary_shapiro,
 			results_var, 
-			results_levene, 
-			results, 
+			summary, 
 			df.T
 			], axis=1)
+	df = pd.concat([df.loc[['Total Count'],:], df.drop('Total Count', axis=0)], axis=0)	
+	df = pd.concat([df.loc[['Criteria Count'],:], df.drop('Criteria Count', axis=0)], axis=0)
+	df = pd.concat([df.loc[['Percentage'],:], df.drop('Percentage', axis=0)], axis=0)
 	df = pd.concat([df.loc[['Group'],:], df.drop('Group', axis=0)], axis=0)
 	
 	df.update(explanations)
