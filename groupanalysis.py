@@ -212,7 +212,7 @@ for j, element in enumerate(inputfiles):
 	except: 
 		progress_bar.stop()
 		progress_bar.join()
-		print "Unexpected error:", sys.exc_info()[0]
+		print "\nUnexpected error:", sys.exc_info()[0]
 
 timeseries_results = pd.concat([timeseries_medians, timeseries_values], axis=1)
 timeseries_results = pd.concat([timeseries_results.loc[['Group'],:], timeseries_results.drop('Group', axis=0)], axis=0)
