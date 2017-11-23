@@ -254,7 +254,6 @@ for j, element in enumerate(sys.argv[1:]):
 				input = input[:-4]
 			data[-1] = data[-1].T
 			data[-1].insert(loc=1, column='Source', value=input)
-			#data[-1]['Group'] = data[-1]['Group'].astype(int)
 if timeseries: 
 	TimeSeries(data, filenames)
 else: 
