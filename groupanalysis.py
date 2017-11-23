@@ -85,7 +85,7 @@ def Calculate(df):
 		results = pd.DataFrame()
 		for column in df.ix[:,2:]:
 			firstrun = True
-			results_zeroes.loc[column,'Zeroes'] = sum(df[column] == 0)
+			results_zeroes.loc[column,'Zeroes'] = sum(df[column].astype(float) == 0)
 			explanations.loc['Group','Zeroes'] = 'Possible errors'
 			results_nans.loc[column,'NaNs'] = sum(df[column].isnull())
 			explanations.loc['Group','NaNs'] = 'Not A Number, possible errors'
@@ -93,22 +93,23 @@ def Calculate(df):
 			names = []
 			for name,group in grouped:
 				id = str(name[0])+"-"+str(name[1])
-				results_medians.loc[column,'Median - '+id] = group[column].median()
-				results_kurt.loc[column,'Kurtosis - '+id] =group[column].kurt()
+				results_medians.loc[column,'Median - '+id] = group[column].astype(float).median()
+				results_kurt.loc[column,'Kurtosis - '+id] =group[column].astype(float).kurt()
 				if firstrun==True: explanations.loc['Group','Kurtosis - '+id] = 'Not normal when <-3 or >3'
-				results_skew.loc[column,'Skewness - '+id] = group[column].skew()
+				results_skew.loc[column,'Skewness - '+id] = group[column].astype(float).skew()
 				if firstrun==True: explanations.loc['Group','Skewness - '+id] = 'Not normal when <-0.8 or >0.8'
-				results_shapiro.loc[column,'Shapiro Norm - '+id] = shapiro(group[column])[1]
+				results_shapiro.loc[column,'Shapiro Norm - '+id] = shapiro(group[column].astype(float))[1]
 				if firstrun==True: explanations.loc['Group','Shapiro Norm - '+id] = 'Not normal when <0.05'
-				results_var.loc[column,'Variance - '+id] = group[column].var()
+				results_var.loc[column,'Variance - '+id] = group[column].astype(float).var()
 				if firstrun==True: explanations.loc['Group','Variance - '+id] = 'The spread from the average'
-				args.append(group[column])	
+				args.append(group[column].astype(float))
 			results.loc[column,'Levene P-Value'] = levene(args[0],*args[1:])[0]
 			if firstrun==True: explanations.loc['Group','Levene P-Value'] = 'Variance is different when <0.05' 
 			results.loc[column,'T-Test Ind. P-value'] = (ttest_ind(args[0],*args[1:])[1]) if groupamount==2 else 'NaN'
 			if firstrun==True: explanations.loc['Group','T-Test Ind. P-value'] = '2 groups independent. Asumes normal dist. Criteria <0.05'
 			results.loc[column,'Mann-Whitney P-value'] = (mannwhitneyu(args[0],*args[1:])[1]) if groupamount==2 else 'NaN'
-			if firstrun==True: explanations.loc['Group','Mann-Whitney P-value'] = '2 groups independent non-parametric. Criteria <0.05'#			results.loc[column,'T-Test Rel. P-value'] = (ttest_rel(args[0],*args[1:])[1]) if groupamount==2 and equalsize else 'NaN'
+			if firstrun==True: explanations.loc['Group','Mann-Whitney P-value'] = '2 groups independent non-parametric. Criteria <0.05'
+			results.loc[column,'T-Test Rel. P-value'] = (ttest_rel(args[0],*args[1:])[1]) if groupamount==2 and equalsize else 'NaN'
 			if firstrun==True: explanations.loc['Group','T-Test Rel. P-value'] = '2 groups dependent. Asumes normal dist. and equal size. Criteria <0.05'
 			results.loc[column,'Wilcoxon P-value'] = (wilcoxon(args[0],*args[1:])[1]) if groupamount==2 and equalsize else 'NaN'
 			if firstrun==True: explanations.loc['Group','Wilcoxon P-value'] = '2 groups dependent non-parametric. Asumes equal size. Criteria <0.05'
@@ -219,7 +220,7 @@ def TimeSeries(data, filenames):
 		fig, ax = plt.subplots()
 		labels = []
 		for key, grp in df.groupby(['Source', 'Group'])[[column]].median().groupby(['Source']):
-			ax = grp.reset_index().plot(ax=ax, x='Group', y=column, xticks=grp.reset_index()['Group'], kind='line', title=column)
+			ax = grp.reset_index().plot(ax=ax, x='Group', y=column, kind='line', title=column)
 			labels.append(key)
 		lines, _ = ax.get_legend_handles_labels()
 		ax.legend(lines, labels, loc='best')
@@ -253,7 +254,7 @@ for j, element in enumerate(sys.argv[1:]):
 				input = input[:-4]
 			data[-1] = data[-1].T
 			data[-1].insert(loc=1, column='Source', value=input)
-			data[-1]['Group'] = data[-1]['Group'].astype(int)
+			#data[-1]['Group'] = data[-1]['Group'].astype(int)
 if timeseries: 
 	TimeSeries(data, filenames)
 else: 
