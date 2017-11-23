@@ -57,8 +57,11 @@ class ProgressBar(threading.Thread):
 # Read data from file
 inputfiles = []
 
+<<<<<<< HEAD
 timeseries = True
 
+=======
+>>>>>>> parent of 040a575... removed timeseries_plt.py and updated plotting to groupanalysis.py
 if len(sys.argv) < 2: 
 	sys.argv.append('example.csv')
 
@@ -73,6 +76,7 @@ timeseries_values = pd.DataFrame()
 timeseries_medians = pd.DataFrame()
 timeseries_results = pd.DataFrame()	
 
+<<<<<<< HEAD
 
 
 df_timeseries
@@ -84,15 +88,23 @@ df_timeseries
 # Loop through all files
 for j, element in enumerate(inputfiles):
 	progress_bar = ProgressBar()
+=======
+# Loop through all files
+for j, element in enumerate(inputfiles):
+>>>>>>> parent of 040a575... removed timeseries_plt.py and updated plotting to groupanalysis.py
 	try: 
 		input = element
 
 		print("\nReading: "+str(input))
+<<<<<<< HEAD
 		
 		if timeseries==False: 
 			df = pd.read_csv(input)
 		else: 
 			df = df_timeseries
+=======
+		df = pd.read_csv(input)
+>>>>>>> parent of 040a575... removed timeseries_plt.py and updated plotting to groupanalysis.py
 
 		if input.endswith('.csv'):
 			input = input[:-4]
@@ -117,6 +129,10 @@ for j, element in enumerate(inputfiles):
 		else: 
 			print ('Groups are NOT equal size: '+str(a))
 	
+<<<<<<< HEAD
+=======
+		progress_bar = ProgressBar()
+>>>>>>> parent of 040a575... removed timeseries_plt.py and updated plotting to groupanalysis.py
 		progress_bar.start()
 
 		# Prepare to capture results
@@ -227,12 +243,21 @@ for j, element in enumerate(inputfiles):
 		
 	except: 
 		progress_bar.stop()
+<<<<<<< HEAD
 
 		print "\nUnexpected error:", sys.exc_info()[0]
 
 timeseries_results = pd.concat([timeseries_medians, timeseries_values], axis=1)
 timeseries_results = pd.concat([timeseries_results.loc[['Group'],:], timeseries_results.drop('Group', axis=0)], axis=0)
 
+=======
+		progress_bar.join()
+		print "\nUnexpected error:", sys.exc_info()[0]
+
+timeseries_results = pd.concat([timeseries_medians, timeseries_values], axis=1)
+timeseries_results = pd.concat([timeseries_results.loc[['Group'],:], timeseries_results.drop('Group', axis=0)], axis=0)
+
+>>>>>>> parent of 040a575... removed timeseries_plt.py and updated plotting to groupanalysis.py
 output = 'medians'+time.strftime("-%d-%m-%Y")+".csv"
 print "\nWriting summary of median values: "+str(output)+"\n"
 timeseries_results.to_csv(output)
