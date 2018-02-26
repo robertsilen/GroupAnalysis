@@ -234,8 +234,13 @@ def TimeSeries(data, filenames):
 		plt.close()
 
 # Create dataframe array that will be passed to TimeSeries or Individual function
-if len(sys.argv) < 2: 
+csvinput = False
+for j, element in enumerate(sys.argv[1:]):
+	if ".csv" in element:
+             csvinput = True
+if csvinput == False:
 	sys.argv.append('example.csv')
+	
 data = []
 filenames = []
 runshapiro = True
