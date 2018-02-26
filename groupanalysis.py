@@ -98,7 +98,8 @@ def Calculate(df):
 				if firstrun==True: explanations.loc['Group','Kurtosis - '+id] = 'Not normal when <-3 or >3'
 				results_skew.loc[column,'Skewness - '+id] = group[column].astype(float).skew()
 				if firstrun==True: explanations.loc['Group','Skewness - '+id] = 'Not normal when <-0.8 or >0.8'
-				results_shapiro.loc[column,'Shapiro Norm - '+id] = shapiro(group[column].astype(float))[1]
+				if runshapiro==True: 
+					results_shapiro.loc[column,'Shapiro Norm - '+id] = shapiro(group[column].astype(float))[1]
 				if firstrun==True: explanations.loc['Group','Shapiro Norm - '+id] = 'Not normal when <0.05'
 				results_var.loc[column,'Variance - '+id] = group[column].astype(float).var()
 				if firstrun==True: explanations.loc['Group','Variance - '+id] = 'The spread from the average'
@@ -141,9 +142,9 @@ def Calculate(df):
 		summary_skew.loc['Percentage'] =  (results_skew[(results_skew < -0.8) | (results_skew > 0.8)].count() / len(results_skew)).apply('{:.0%}'.format)
 
 		summary_shapiro = results_shapiro.copy()
-		summary_shapiro.loc['Criteria Count'] = results_shapiro[(results_shapiro < 0.05)].count().apply('{:d}'.format)
-		summary_shapiro.loc['Total Count'] =  len(results_shapiro)
-		summary_shapiro.loc['Percentage'] = (results_shapiro[(results_shapiro < 0.05)].count() / len(results_shapiro)).apply('{:.0%}'.format)
+		if runshapiro==True: summary_shapiro.loc['Criteria Count'] = results_shapiro[(results_shapiro < 0.05)].count().apply('{:d}'.format)
+		if runshapiro==True: summary_shapiro.loc['Total Count'] =  len(results_shapiro)
+		if runshapiro==True: summary_shapiro.loc['Percentage'] = (results_shapiro[(results_shapiro < 0.05)].count() / len(results_shapiro)).apply('{:.0%}'.format)
 
 		summary = results.copy()
 		summary.loc['Criteria Count'] =  results[(results < 0.05)].count().apply('{:d}'.format)
@@ -237,10 +238,14 @@ if len(sys.argv) < 2:
 	sys.argv.append('example.csv')
 data = []
 filenames = []
+runshapiro = True
+runnormality = True
 timeseries = False
 
 print "\nInput files:" 
 for j, element in enumerate(sys.argv[1:]):
+	if element == "-noshapiro":
+		runshapiro = False
 	if element == "-timeseries":
 		timeseries = True
 	else: 
